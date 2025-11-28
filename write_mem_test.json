@@ -1,0 +1,5 @@
+{
+  "command": "write_mem", 
+  "value_register": 2,
+  "address_register": 9
+}

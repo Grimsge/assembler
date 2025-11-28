@@ -1,0 +1,5 @@
+{
+  "command": "read_mem",
+  "register": 3,
+  "memory_address": 659
+}

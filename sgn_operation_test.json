@@ -1,0 +1,6 @@
+{
+  "command": "sgn_operation",
+  "base_register": 24,
+  "target_register": 13,
+  "offset": 398
+}
