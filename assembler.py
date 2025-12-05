@@ -1,6 +1,6 @@
-import json
-import argparse
-import sys
+import json #чтение файлов json
+import sys #чтение аргументов в консоли
+import os #узнать размер созданного файла
 
 LOAD_CONST = 10
 READ_MEMORY = 3
@@ -21,35 +21,30 @@ def read_json(filename): #функция чтения json файла с про�
 
 def parse_command(command_dict): #функция растаскивающая этот словарь на отдельные переменные
     command = command_dict["command"]
-    try:
-        if command == "load_const":
-            A=LOAD_CONST
-            B=command_dict["register"]
-            C=command_dict["value"]
-            return A,B,C
+    if command == "load_const":
+        A=LOAD_CONST
+        B=command_dict["register"]
+        C=command_dict["value"]
+        return A,B,C
    
-        elif command == "read_mem":
-            A=READ_MEMORY
-            B=command_dict["register"]
-            C=command_dict["memory_address"]
-            return A,B,C
-        elif command== "write_mem":
-            A=WRITE_MEMORY
-            B=command_dict["value_register"]
-            C=command_dict["address_register"]
-            return A,B,C
-        elif command =="sgn_operation":
-            A=SGN_OPERATION
-            B=command_dict["base_register"]
-            C=command_dict["target_register"]
-            D=command_dict["offset"]
-            return A,B,C,D
-        else:
-            raise Exception(f"Неизвестная команда: '{command}'")
-    except KeyError as e:
-        # e - это название отсутствующего ключа, например 'register'
-        missing_field = str(e).strip("'")
-        raise Exception(f"ОШИБКА: в команде '{command}' отсутствует поле '{missing_field}'")
+    elif command == "read_mem":
+        A=READ_MEMORY
+        B=command_dict["register"]
+        C=command_dict["memory_address"]
+        return A,B,C
+    elif command== "write_mem":
+        A=WRITE_MEMORY
+        B=command_dict["value_register"]
+        C=command_dict["address_register"]
+        return A,B,C
+    elif command =="sgn_operation":
+        A=SGN_OPERATION
+        B=command_dict["base_register"]
+        C=command_dict["target_register"]
+        D=command_dict["offset"]
+        return A,B,C,D
+    else:
+        raise Exception(f"Неизвестная команда: '{command}'")
 
 def make_bytes(*args): #функция которая переводит в двоичную систему исчисления, склеивает всю команду в 40 битов
 #и разбивает эти 40 битов на 5 байт в шестнадцатиричной
@@ -79,21 +74,30 @@ def make_bytes(*args): #функция которая переводит в дв
 
         
 def load_const():
-    print("load_const")
+    print("*отработка команды load_const")
 
 def read_mem():
-    print("read_mem")
+    print("*отработка команды read_mem")
 
 def write_mem():
-    print("write_mem")
+    print("*отработка команды write_mem")
 
 def sgn_operation():
-    print("sgn_operation")
+    print("*отработка команды sgn_operation")
+
+def write_file(output_name,hex_bytes): #Этап 2 - функция записи в файл получившихся байтов, вывод реального размера
+    bytes_list = [int(h[2:], 16) for h in hex_bytes]
+    with open(output_name,"wb") as output_file:
+        output_file.write(bytes(bytes_list))
+        print("*байты записаны в файл")
+        
+    size = os.path.getsize(output_name)
+    print(f"размер файла:{size} байт")
 
 def main(): 
     if len(sys.argv) < 3: #проверяем сколько аргументов в cmd 
         print("Использование: python assembler.py <входной_файл> <выходной_файл> [--test]")
-        print("Пример: python assembler.py program.json output.bin --test")
+        print("Пример: py assembler.py program.json output.bin --test")
         exit(1)
     
     input_file = sys.argv[1]
@@ -123,16 +127,23 @@ def main():
     else: #обычный режим
         if len(result) == 3:
             A, B, C = result
+            hex_bytes =make_bytes(A, B, C)
 
             if A == 10:
+                write_file(output_file,hex_bytes)
                 load_const()
+                
             elif A == 3:
+                write_file(output_file,hex_bytes)
                 read_mem()
             elif A == 4:
+                write_file(output_file,hex_bytes)
                 write_mem()
         else:
             A, B, C, D = result
+            hex_bytes = make_bytes(A, B, C, D)
             if A == 6:
+                write_file(output_file,hex_bytes)
                 sgn_operation()
 if __name__ == "__main__":
     main()
